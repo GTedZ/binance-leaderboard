@@ -1,12 +1,12 @@
 const axios = require('axios');
 
-const api = function everything() {
-    if (!new.target) return new api();
+const api = "https://www.binance.com";
 
-    const api = "https://www.binance.com";
+class BinanceLeaderboard {
 
-    this.search = {
-        nickname: async function (nickname = '') {
+    search = {
+
+        nickname: async (nickname = '') => {
             const params = {
                 baseURL: api,
                 path: '/bapi/futures/v1/public/future/leaderboard/searchNickname',
@@ -18,67 +18,71 @@ const api = function everything() {
 
             if (response.error) return response;
             return response.data;
+        }
+
+    }
+
+    leaderboard = {
+        /**
+        * @param {true|false} isShared - true | false
+        * @param {true|false} isTrader - true | false
+        * @param {'PERPETUAL'} tradeType - "PERPETUAL"
+        * @param {'ROI'|'PNL'} statisticsType - "ROI" || "PNL"
+        * @param {"DAILY" | "WEEKLY" | "MONTHLY" | "ALL"} periodType - "DAILY" || "WEEKLY" || "MONTHLY" || "ALL"
+        */
+        highestRank: async (isShared = true, isTrader = true, tradeType = 'PERPETUAL', statisticsType = 'ROI', periodType = 'WEEKLY') => {
+            const params = {
+                baseURL: api,
+                path: '/bapi/futures/v3/public/future/leaderboard/getLeaderboardRank',
+                method: 'post',
+                payload: {
+                    isShared,
+                    isTrader,
+                    periodType,
+                    statisticsType,
+                    tradeType
+                }
+            }
+
+            return await request(params);
         },
 
-        leaderboard: {
-            /**
-             * @param {Boolean} isShared - true | false
-             * @param {Boolean} isTrader - true | false
-             * @param {String} tradeType - "PERPETUAL"
-             * @param {String} statisticsType - "ROI" || "PNL"
-             * @param {String} periodType - "DAILY" || "WEEKLY" || "MONTHLY" || "ALL"
-             */
-            top: async function (isShared = true, isTrader = true, tradeType = 'PERPETUAL', statisticsType = 'ROI', periodType = 'WEEKLY') {
-                const params = {
-                    baseURL: api,
-                    path: '/bapi/futures/v3/public/future/leaderboard/getLeaderboardRank',
-                    method: 'post',
-                    payload: {
-                        isShared,
-                        isTrader,
-                        periodType,
-                        statisticsType,
-                        tradeType
-                    }
+        /**
+         * @param {'PERPETUAL'|'QUARTERLY'} tradeType
+         */
+        featuresUsers: async (tradeType) => {
+            const params = {
+                baseURL: api,
+                path: '/bapi/futures/v1/public/future/leaderboard/getFeaturedUserRank',
+                method: 'post',
+                payload: {
+                    tradeType
                 }
-
-                const response = await request(params);
-                if (response.error) return response;
-                return response;
-            },
-
-            featuresUsers: async function() {
-                // /bapi/futures/v1/public/future/leaderboard/getFeaturedUserRank
-            },
-
-            highestRank: async function() {
-                // /bapi/futures/v3/public/future/leaderboard/getLeaderboardRank
-            },
-
-            topStrategies: async function() {
-                //
             }
+
+            return request(params);
         }
     }
 
-
-    const request = async function (params) {
-        try {
-            const response = await await axios({
-                method: params.method,
-                url: params.baseURL + params.path,
-                // headers: params.headers,
-                data: params.payload || ""
-            });
-            return response.data;
-        } catch (err) {
-            console.log({ err });
-            return {
-                error: err
-            }
-        }
-
-    }
 }
 
-module.exports = api;
+async function request(params) {
+    try {
+        const response = await await axios({
+            method: params.method,
+            url: params.baseURL + params.path,
+            // headers: params.headers,
+            data: params.payload || ""
+        });
+        // console.log(response);
+        return response.data;
+    } catch (err) {
+        console.log({ err });
+        return {
+            error: err
+        }
+    }
+
+}
+
+module.exports = BinanceLeaderboard;
